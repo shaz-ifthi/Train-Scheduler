@@ -1,0 +1,206 @@
+ <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Train Scheduler</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .title {
+            /* display: inline; */
+            text-align: center;
+            color: white;
+        }
+
+        .jumbotron {
+            background-color: rgb(138, 63, 63);
+        }
+
+        h2 {
+            background-color: #002ABC;
+            color: white;
+            font-size: 20px;
+
+        }
+
+        .card {
+            border: 2px solid rgb(100, 98, 98);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: rgb(49, 117, 180);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        #searchForm {
+            padding-left: 10px;
+            padding-top: 10px;
+        }
+
+        form {
+            padding-right: 10px;
+            padding-left: 10px;
+            padding-bottom: 20px;
+        }
+
+        .buttons {
+            background-color: grey;
+            color: white;
+        }
+
+        .form-1 {
+            height: 100px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="jumbotron jumbotron-fluid">
+
+            <!-- <span class="glyphicon glyphicon-newspaper"></span> -->
+            <span class="title">
+
+                <h1 class="display-4">
+                    <i style="font-size:48px"></i> Train Scheduler</h1>
+                <h3></h3>
+
+            </span>
+        </div>
+
+        <div class="card">
+
+            <div class="card-header">
+
+
+
+                <span id="searchForm" style="font-size:20px"> Current Train Schedule</span>
+            </div>
+            <div class="form-1">
+
+                <div class="articles-section">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Train Name</th>
+                                <th scope="col">Destination</th>
+                                <th scope="col">Frequency (min)</th>
+                                <th scope="col">Next Arrival</th>
+                                <th scope="col">Minutes Away</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">Trenton Express</th>
+                                <td>Trenton</td>
+                                <td>25</td>
+                                <td>5:35pm</td>
+                                <td>10</tr>
+
+                            </tr>
+
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+
+                <span id="searchForm" style="font-size:20px"> Add Train</span>
+            </div>
+            <div class="card-body">
+
+                <form>
+                    <div class="form-group">
+                        <label for="trainName">Train Name</label>
+                        <input type="text" class="form-control" id="trainName" placeholder="" name="trainName">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="destination">Destination</label>
+                        <input type="text" class="form-control" id="destination" placeholder="" name="destination">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="firstTrain">First Train</label>
+                        <input type="time" class="form-control" id="firstTrain" placeholder="" name="firstTrain">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="frequency">Frequency</label>
+                        <input type="number" class="form-control" id="frequency" placeholder="" name="frequency">
+                    </div>
+
+                    <button type="submit" id="submitBTN" class="btn btn-default buttons">
+                        <span style="font-size:12px"></span>Submit</button>
+                </form>
+
+
+            </div>
+        </div>
+        <br>
+        <br>
+        <!-- Firebase -->
+        <script src="https://www.gstatic.com/firebasejs/4.10.1/firebase.js"></script>
+
+        <!-- JQuery -->
+        <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+
+        <!-- MomentJS -->
+        <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+
+        <script>
+            // console.log(moment('12/13/1901', 'DD/MM/YYYY').format('ddd MMM, DD, YYYY'))
+
+            // Initialize Firebase
+            var config = {
+                apiKey: "AIzaSyCvHMN7v_3MT5BQN-6JvABQ9e8Rv3iJP_c",
+                authDomain: "train-scheduler-85af2.firebaseapp.com",
+                databaseURL: "https://train-scheduler-85af2.firebaseio.com",
+                projectId: "train-scheduler-85af2",
+                storageBucket: "train-scheduler-85af2.appspot.com",
+                messagingSenderId: "955538316909"
+            };
+            firebase.initializeApp(config)
+
+            var database = firebase.database()
+
+            var users = database.ref('/users')
+            var destination
+            
+            $('#submitBTN').on('click', function (event) {
+                event.preventDefault()
+                name = $("#trainName").val().trim()
+
+                role = $('#destination').val().trim()
+                // // var startDate = parseInt($('#startDate').val().trim())
+
+                users.push({
+                    name: name,
+                    destination: destination,
+                    //number: number
+                })
+
+                users.orderByChild('number').limitToLast(1).on('child_added', function (snap) {
+                    console.log(snap.val())
+                })
+            })
+        </script>
+</body>
+
+</html>
+ 
+
