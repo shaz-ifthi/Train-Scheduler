@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -56,8 +56,17 @@
         }
 
         .form-1 {
-            height: 100px;
+            /* height: 100px; */
+            resize: both;
+            overflow: auto;
         }
+
+
+        /* .form-1 {
+            padding-right: 10px;
+            padding-left: 10px;
+            padding-bottom: 20px;
+        } */
     </style>
 </head>
 
@@ -66,7 +75,7 @@
     <div class="container">
         <div class="jumbotron jumbotron-fluid">
 
-            <!-- <span class="glyphicon glyphicon-newspaper"></span> -->
+            <span class="glyphicon glyphicon-newspaper"></span>
             <span class="title">
 
                 <h1 class="display-4">
@@ -75,6 +84,7 @@
 
             </span>
         </div>
+
 
         <div class="card">
 
@@ -113,15 +123,19 @@
                     </table>
                 </div>
             </div>
-
         </div>
+
+
+
+
+
 
         <div class="card">
             <div class="card-header">
 
                 <span id="searchForm" style="font-size:20px"> Add Train</span>
             </div>
-            <div class="card-body">
+            <div class="form-2">
 
                 <form>
                     <div class="form-group">
@@ -151,56 +165,128 @@
 
             </div>
         </div>
-        <br>
-        <br>
-        <!-- Firebase -->
-        <script src="https://www.gstatic.com/firebasejs/4.10.1/firebase.js"></script>
+    </div>
+    <br>
+    <br>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/4.10.1/firebase.js"></script>
 
-        <!-- JQuery -->
-        <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
 
-        <!-- MomentJS -->
-        <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+    <!-- MomentJS -->
+    <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
 
-        <script>
-            // console.log(moment('12/13/1901', 'DD/MM/YYYY').format('ddd MMM, DD, YYYY'))
+    <script>
+        // console.log(moment('12/13/1901', 'DD/MM/YYYY').format('ddd MMM, DD, YYYY'))
 
-            // Initialize Firebase
-            var config = {
-                apiKey: "AIzaSyCvHMN7v_3MT5BQN-6JvABQ9e8Rv3iJP_c",
-                authDomain: "train-scheduler-85af2.firebaseapp.com",
-                databaseURL: "https://train-scheduler-85af2.firebaseio.com",
-                projectId: "train-scheduler-85af2",
-                storageBucket: "train-scheduler-85af2.appspot.com",
-                messagingSenderId: "955538316909"
-            };
-            firebase.initializeApp(config)
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyCvHMN7v_3MT5BQN-6JvABQ9e8Rv3iJP_c",
+            authDomain: "train-scheduler-85af2.firebaseapp.com",
+            databaseURL: "https://train-scheduler-85af2.firebaseio.com",
+            projectId: "train-scheduler-85af2",
+            storageBucket: "train-scheduler-85af2.appspot.com",
+            messagingSenderId: "955538316909"
+        };
+        firebase.initializeApp(config)
 
-            var database = firebase.database()
+        var database = firebase.database()
 
-            var users = database.ref('/users')
-            var destination
-            
-            $('#submitBTN').on('click', function (event) {
-                event.preventDefault()
-                name = $("#trainName").val().trim()
+        var users = database.ref('/users')
+        var destination
+        var train_dest
+        var train_name
+        var first_train
 
-                role = $('#destination').val().trim()
-                // // var startDate = parseInt($('#startDate').val().trim())
+        var frequency = $("#frequency").val().trim();
+        // Time is 3:30 AM
+        // var firstTime = "03:30";
+      /*   var firstTime = first_train;
+        // First Time (pushed back 1 year to make sure it comes before current time)
+        var firstTimeConverted = moment(firstTime, "hh:mm").subtract(1, "years");
+        console.log(firstTimeConverted);
+        // Current Time
+        var currentTime = moment();
+        console.log("CURRENT TIME: " + moment(currentTime).format("hh:mm"));
+        // Difference between the times
+        var diffTime = moment().diff(moment(firstTimeConverted), "minutes");
+        console.log("DIFFERENCE IN TIME: " + diffTime);
+        // Time apart (remainder)
+        var tRemainder = diffTime % frequency;
+        console.log(tRemainder);
+        // Minute Until Train
+        // var tMinutesTillTrain = tFrequency - tRemainder;
+        console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
+        // Next Train
+        var nextTrain = moment().add(tMinutesTillTrain, "minutes");
+        console.log("ARRIVAL TIME: " + moment(nextTrain).format("hh:mm")) */;
 
-                users.push({
-                    name: name,
-                    destination: destination,
-                    //number: number
-                })
+        $('#submitBTN').on('click', function (event) {
 
-                users.orderByChild('number').limitToLast(1).on('child_added', function (snap) {
-                    console.log(snap.val())
-                })
+            event.preventDefault()
+            var name = $("#trainName").val().trim()
+
+            destination = $("#destination").val().trim()
+
+            var firstTrain = $("#firstTrain").val().trim();
+
+
+            var frequency = $("#frequency").val().trim()
+
+            users.push({
+                train_name: name,
+                train_dest: destination,
+                first_train: firstTrain,
+                train_freq: frequency
+
+                //number: number
             })
-        </script>
+
+            retrieve_train()
+
+        })
+
+        function retrieve_train() {
+            var first = true
+          
+            users.orderByChild('train_name').limitToLast(1).on('child_added', function (snap) {
+                // console.log(snap.val().train_name)
+                if (first === true) {
+                    $("tbody").append("<tr><td>" + snap.val().train_name + "</td><td>" + snap.val().train_dest + "</td><td>" + snap.val().first_train)
+
+                 
+                    var firstTime = snap.val().first_train;
+                    var tFrequency = snap.val().train_freq;
+                    console.log("firstTime = " + firstTime)
+                    // First Time (pushed back 1 year to make sure it comes before current time)
+                    var firstTimeConverted = moment(firstTime, "hh:mm").subtract(1, "years");
+                    console.log("first time converted" + firstTimeConverted);
+                    // Current Time
+                    var currentTime = moment();
+                    console.log("CURRENT TIME: " + moment(currentTime).format("hh:mm"));
+                    first = false
+                    // Difference between the times
+                    var diffTime = moment().diff(moment(firstTimeConverted), "minutes");
+                    console.log("DIFFERENCE IN TIME: " + diffTime);
+                    // Time apart (remainder)
+                    var tRemainder = diffTime % tFrequency;
+                    console.log("tRemainder "+tRemainder);
+                    // Minute Until Train
+                     var tMinutesTillTrain = tFrequency - tRemainder;
+                    console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
+                    // Next Train
+                    var nextTrain = moment().add(tMinutesTillTrain, "minutes");
+                    console.log("ARRIVAL TIME: " + moment(nextTrain).format("hh:mm"));
+
+                }
+            })
+        }
+
+
+
+        // $(".table").append("</td><td>" + train_dest);
+    </script>
 </body>
 
 </html>
- 
-
