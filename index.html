@@ -15,53 +15,42 @@
             text-align: center;
             color: white;
         }
-
         .jumbotron {
             background-color: rgb(138, 63, 63);
         }
-
         h2 {
             background-color: #002ABC;
             color: white;
             font-size: 20px;
-
         }
-
         .card {
             border: 2px solid rgb(100, 98, 98);
             margin-bottom: 20px;
         }
-
         .card-header {
             background-color: rgb(49, 117, 180);
             padding-bottom: 10px;
             margin-bottom: 10px;
             color: white;
         }
-
         #searchForm {
             padding-left: 10px;
             padding-top: 10px;
         }
-
         form {
             padding-right: 10px;
             padding-left: 10px;
             padding-bottom: 20px;
         }
-
         .buttons {
             background-color: grey;
             color: white;
         }
-
         .form-1 {
             /* height: 100px; */
             resize: both;
             overflow: auto;
         }
-
-
         /* .form-1 {
             padding-right: 10px;
             padding-left: 10px;
@@ -179,7 +168,6 @@
 
     <script>
         // console.log(moment('12/13/1901', 'DD/MM/YYYY').format('ddd MMM, DD, YYYY'))
-
         // Initialize Firebase
         var config = {
             apiKey: "AIzaSyCvHMN7v_3MT5BQN-6JvABQ9e8Rv3iJP_c",
@@ -190,15 +178,12 @@
             messagingSenderId: "955538316909"
         };
         firebase.initializeApp(config)
-
         var database = firebase.database()
-
         var users = database.ref('/users')
         var destination
         var train_dest
         var train_name
         var first_train
-
         var frequency = $("#frequency").val().trim();
         // Time is 3:30 AM
         // var firstTime = "03:30";
@@ -221,70 +206,50 @@
         // Next Train
         var nextTrain = moment().add(tMinutesTillTrain, "minutes");
         console.log("ARRIVAL TIME: " + moment(nextTrain).format("hh:mm")) */;
-
         $('#submitBTN').on('click', function (event) {
-
             event.preventDefault()
             var name = $("#trainName").val().trim()
-
             destination = $("#destination").val().trim()
-
             var firstTrain = $("#firstTrain").val().trim();
-
-
             var frequency = $("#frequency").val().trim()
-
             users.push({
                 train_name: name,
                 train_dest: destination,
                 first_train: firstTrain,
                 train_freq: frequency
-
                 //number: number
             })
-
             retrieve_train()
-
         })
-
         function retrieve_train() {
             var first = true
           
             users.orderByChild('train_name').limitToLast(1).on('child_added', function (snap) {
                 // console.log(snap.val().train_name)
                 if (first === true) {
-                    $("tbody").append("<tr><td>" + snap.val().train_name + "</td><td>" + snap.val().train_dest + "</td><td>" + snap.val().first_train)
-
                  
-                    var firstTime = snap.val().first_train;
-                    var tFrequency = snap.val().train_freq;
-                    console.log("firstTime = " + firstTime)
-                    // First Time (pushed back 1 year to make sure it comes before current time)
-                    var firstTimeConverted = moment(firstTime, "hh:mm").subtract(1, "years");
-                    console.log("first time converted" + firstTimeConverted);
-                    // Current Time
-                    var currentTime = moment();
-                    console.log("CURRENT TIME: " + moment(currentTime).format("hh:mm"));
+                    var firstTrain = snap.val().first_train;
+                    var trainFreq = snap.val().train_freq;
+                    // Normalize firstTrain time
+                    var firstTrainNormalized = moment(firstTrain, "hh:mm").subtract(1, "years");
+                    // time right now
+                    var timeNow = moment();
                     first = false
-                    // Difference between the times
-                    var diffTime = moment().diff(moment(firstTimeConverted), "minutes");
-                    console.log("DIFFERENCE IN TIME: " + diffTime);
-                    // Time apart (remainder)
-                    var tRemainder = diffTime % tFrequency;
-                    console.log("tRemainder "+tRemainder);
-                    // Minute Until Train
-                     var tMinutesTillTrain = tFrequency - tRemainder;
-                    console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
-                    // Next Train
-                    var nextTrain = moment().add(tMinutesTillTrain, "minutes");
-                    console.log("ARRIVAL TIME: " + moment(nextTrain).format("hh:mm"));
+                    // delta between the current time and time of the first train in minutes
+                    var deltaTime = moment().diff(moment(firstTrainNormalized), "minutes");
+                    // Time remaining
+                    var timeRem = deltaTime % trainFreq;
+                    // time in minutes before next train
+                     var minBeforeNxtTrain = trainFreq - timeRem;
+                    // next train arrival time
+                    var nxtArrivalTimeRaw = moment().add(minBeforeNxtTrain, "minutes");
+                    var nxtArrivalTime = moment(nxtArrivalTimeRaw).format("hh:mm")
+                    console.log("Next Arrival Time: " + nxtArrivalTime);
+                    $("tbody").append("<tr><td>" + snap.val().train_name + "</td><td>" + snap.val().train_dest + "</td><td>" + snap.val().train_freq +"</td><td>" + nxtArrivalTime +"</td><td>" + minBeforeNxtTrain )
 
                 }
             })
         }
-
-
-
         // $(".table").append("</td><td>" + train_dest);
     </script>
 </body>
